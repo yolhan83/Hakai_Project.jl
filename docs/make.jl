@@ -16,3 +16,8 @@ makedocs(;
         "Home" => "index.md",
     ],
 )
+
+deploydocs(;
+    repo="https://github.com/yolhan83/Hakai_Project.jl",
+    devbranch="master",
+)
