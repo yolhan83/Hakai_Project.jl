@@ -747,7 +747,7 @@ function parse_global_model_data(lines::Vector{String}, parts::Vector{PartType},
         mat_id = fill(parts[part_id].material_id, parts[part_id].nElement)
         append!(element_material, mat_id)
         inst_ids = fill(i, parts[part_id].nElement)
-        push!(element_instance, inst_ids)
+        append!(element_instance, inst_ids)
     end
     return (n_node_total, global_coordmat, n_elem_total, global_elementmat, element_material, element_instance)
 end
