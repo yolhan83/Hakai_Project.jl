@@ -1,0 +1,7 @@
+name = "Hakai_Project"
+uuid = "d882708a-e8db-442d-b14f-1a87a95ee138"
+authors = ["yolhan83 <yolhan@laposte.net>"]
+version = "0.0.1"
+
+[compat]
+julia = "1.10"
