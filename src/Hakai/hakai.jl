@@ -51,7 +51,7 @@ end
 #                 Refactored Helper Blocks              #
 #########################################################
 
-"""
+@doc raw"""
     prepareMaterialProperties!(MODEL)
 
 Loops over MODEL.MATERIAL to compute and store properties like G, Dmat,
@@ -98,7 +98,7 @@ function prepareMaterialProperties!(MODEL)
 end
 
 
-"""
+@doc raw"""
     computeElementVolumes(MODEL, Pusai_mat; integ_num=8)
 
 Given the shape function matrix (Pusai_mat) and the MODEL's global coords,
@@ -125,7 +125,7 @@ function computeElementVolumes(MODEL, Pusai_mat; integ_num=8)
 end
 
 
-"""
+@doc raw"""
     buildMassDamping(MODEL, elementVolume; mass_scaling=1.0)
 
 Constructs the diagonal mass and damping arrays diag_M, diag_C
@@ -165,7 +165,7 @@ function buildMassDamping(MODEL, elementVolume; mass_scaling=1.0)
 end
 
 
-"""
+@doc raw"""
     initDisplacementVelocity(MODEL, nNode, d_time, diag_M, mass_scaling)
 
 Creates and returns arrays for disp, disp_new, disp_pre, velo, and position.
@@ -197,7 +197,7 @@ function initDisplacementVelocity(MODEL, nNode, d_time, diag_M, mass_scaling)
 end
 
 
-"""
+@doc raw"""
     setupContact!(MODEL)
 
 Handles logic to build up contact pairs, surfaces, etc.
@@ -334,7 +334,7 @@ function setupContact!(MODEL)
 end
 
 
-"""
+@doc raw"""
     runMainTimeLoop!(MODEL, diag_M, diag_C, disp, disp_new, disp_pre, velo, position,
                      contactData, elementVolume, Pusai_mat)
 
@@ -578,7 +578,7 @@ function runMainTimeLoop!(MODEL,
 end
 
 
-"""
+@doc raw"""
     doFractureCheck!(MODEL, element_flag, eq_plastic, triax, integ_stress, integ_strain)
 
 Checks which elements should be "deleted" (element_flag=0) based on
@@ -667,7 +667,7 @@ function doFractureCheck!(MODEL, element_flag,
 end
 
 
-"""
+@doc raw"""
     applyBoundaryConditions!(MODEL, disp_new, step, d_time)
 
 Implements the boundary conditions each time step, using amplitude interpolation.
@@ -803,7 +803,7 @@ function cal_triax_stress(integ_stress::Array{Float64,2},
     end
 end
 
-"""
+@doc raw"""
     cal_Pusai_hexa(integ_num)
 
 Generates the shape-function gradient matrices for an 8-integration-point
@@ -869,7 +869,7 @@ function cal_Pusai_hexa(integ_num)
     return Pusai_mat
 end
 
-"""
+@doc raw"""
     get_element_face(MODEL, i)
 
 For the i-th instance in `MODEL`, returns three arrays describing the
@@ -944,7 +944,7 @@ function get_element_face(MODEL, i)
     return faces, faces_eleid, sorted_faces
 end
 
-"""
+@doc raw"""
     get_surface_triangle(INSTANCE_i, array_element, contact_element)
 
 Given a single `InstanceType` (`INSTANCE_i`), an array of local element indices
@@ -1084,7 +1084,7 @@ function get_surface_triangle(INSTANCE_i, array_element, contact_element)
     return c_triangles, c_triangles_eleid, c_nodes
 end
 
-"""
+@doc raw"""
     cal_node_stress_strain(nNode::Int, elementmat::Array{Int,2}, integ_num::Int, integ_data::IntegDataType)
 
 Averages integration-point (Gauss-point) stress/strain values to each node.
@@ -1200,7 +1200,7 @@ function cal_node_stress_strain(nNode::Int,
     return node_data
 end
 
-"""
+@doc raw"""
     write_vtk(index::Int, coordmat::AbstractMatrix{T}, elementmat::AbstractMatrix{Int},
               element_flag::AbstractVector{Int}, disp::AbstractVector{T}, velo::AbstractVector{T},
               node_data::NodeDataType)
@@ -1442,7 +1442,7 @@ function write_vtk(index::Int,
     close(out)
 end
 
-"""
+@doc raw"""
     cal_contact_force(c_force3, CT, instance_pair, cp_index,
                       position::Array{Float64,2}, velo::Array{Float64,1}, diag_M::Array{Float64,1},
                       elementMinSize::Float64, elementMaxSize::Float64, d_max::Float64,
@@ -1754,7 +1754,7 @@ function cal_contact_force(c_force3, CT, instance_pair, cp_index,
     return
 end
 
-"""
+@doc raw"""
     my3crossNNz(a1::Float64, a2::Float64, a3::Float64, b1::Float64, b2::Float64, b3::Float64)
 
 Returns `(nx, ny, nz)` which is the normalized cross product of vectors `a = (a1, a2, a3)`
@@ -1780,7 +1780,7 @@ function my3crossNNz(a1::Float64, a2::Float64, a3::Float64, b1::Float64, b2::Flo
 return n1, n2, n3
 end
 
-"""
+@doc raw"""
     my3SolveAb(A11::Float64, A21::Float64, A31::Float64,
                A12::Float64, A22::Float64, A32::Float64,
                A13::Float64, A23::Float64, A33::Float64,
@@ -1827,7 +1827,7 @@ x3 = (im31*bx + im32*by + im33*bz) / v
 return x1, x2, x3
 end
 
-"""
+@doc raw"""
     cal_stress_hexa(Qe, integ_stress::Array{Float64,2}, integ_strain::Array{Float64,2},
                     integ_yield_stress::Array{Float64,1}, integ_eq_plastic_strain::Array{Float64,1},
                     position_::Array{Float64,2}, d_disp_::Array{Float64,1},
@@ -2046,7 +2046,7 @@ function cal_stress_hexa(Qe,
     return
 end
 
-"""
+@doc raw"""
     cal_BVbar_hexa(Pusai_mat, e_position, BVbar)
 
 Given:
@@ -2145,7 +2145,7 @@ function cal_BVbar_hexa(Pusai_mat,
     return V
 end
 
-"""
+@doc raw"""
     cal_Bfinal(Bfinal, BVbar, Pusai1, e_position)
 
 Computes the final strain-displacement matrix `Bfinal` for a single Gauss point of an 8-node
