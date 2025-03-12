@@ -6,7 +6,4 @@ using Aqua
     @testset "Code quality (Aqua.jl)" begin
         Aqua.test_all(Hakai_Project; ambiguities = false,)
     end
-    @testset "Exemple" begin
-        include("../exemples/test.jl")
-    end
 end

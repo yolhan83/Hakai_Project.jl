@@ -155,7 +155,7 @@ end
 #          Helper Functions for Reading/Parsing         #
 #########################################################
 
-"""
+@doc raw"""
     readFile(fname::String) -> Vector{String}
 
 Reads the entire input file into a vector of lines.
@@ -167,7 +167,7 @@ function readFile(fname::String)
     return lines
 end
 
-"""
+@doc raw"""
     findLineIndices(lines::Vector{String}, pattern::String) -> Vector{Int}
 
 Returns all line indices in `lines` that contain the given `pattern`.
@@ -182,7 +182,7 @@ function findLineIndices(lines::Vector{String}, pattern::String)
     return idx
 end
 
-"""
+@doc raw"""
     parseParts(lines::Vector{String}) -> Vector{PartType}
 
 Parses all *Part sections (with nodes/elements) into an array of `PartType`.
@@ -317,7 +317,7 @@ function parseParts(lines::Vector{String})
     return PART
 end
 
-"""
+@doc raw"""
     parseInstances(lines, PART) -> Vector{InstanceType}
 
 Finds all *Instance blocks and populates an array of InstanceType.
@@ -365,7 +365,7 @@ function parseInstances(lines::Vector{String}, PART::Vector{PartType})
     return INSTANCE
 end
 
-"""
+@doc raw"""
     parseGlobalNsets(lines, INSTANCE) -> Vector{NsetType}
 
 Parses any *Nset with "instance=" at the global level.
@@ -434,7 +434,7 @@ function parseGlobalNsets(lines::Vector{String}, INSTANCE::Vector{InstanceType})
     return NSET
 end
 
-"""
+@doc raw"""
     parseGlobalElsets(lines, INSTANCE) -> Vector{ELsetType}
 
 Parses any *Elset with "instance=" at the global level.
@@ -513,7 +513,7 @@ function parseGlobalElsets(lines::Vector{String}, INSTANCE::Vector{InstanceType}
     return ELSET
 end
 
-"""
+@doc raw"""
     parseSurfaces(lines, ELSET) -> Vector{SurfaceType}
 
 Parses *Surface blocks and populates SurfaceType.
@@ -559,7 +559,7 @@ function parseSurfaces(lines::Vector{String}, ELSET::Vector{ELsetType})
     return SURFACE
 end
 
-"""
+@doc raw"""
     buildGlobalModel!(PART, INSTANCE) -> (nNode, coordmat, nElement, elementmat)
 
 Given the PART and INSTANCE arrays, iterates over each instance to:
@@ -637,7 +637,7 @@ function buildGlobalModel!(PART::Vector{PartType}, INSTANCE::Vector{InstanceType
     return (nNode, coordmat_final, nElement, elementmat_final)
 end
 
-"""
+@doc raw"""
     parseAmplitudes(lines) -> Vector{AmplitudeType}
 
 Parses *Amplitude blocks.
@@ -676,7 +676,7 @@ function parseAmplitudes(lines::Vector{String})
     return AMPLITUDE
 end
 
-"""
+@doc raw"""
     parseMaterials(lines) -> Vector{MaterialType}
 
 Parses *Material blocks.
@@ -780,7 +780,7 @@ function parseMaterials(lines::Vector{String})
     return MATERIAL
 end
 
-"""
+@doc raw"""
     assignElementMaterial!(PART, INSTANCE, MATERIAL) -> (element_material, element_instance)
 
 Given PART, INSTANCE, and MATERIAL arrays, figure out the material assignments per element
@@ -809,7 +809,7 @@ function assignElementMaterial!(PART::Vector{PartType},
     return (element_material, element_instance)
 end
 
-"""
+@doc raw"""
     parseStep(lines) -> (d_time, end_time)
 
 Parses *Dynamic, Explicit parameters.
@@ -828,7 +828,7 @@ function parseStep(lines::Vector{String})
     return (d_time, end_time)
 end
 
-"""
+@doc raw"""
     parseMassScaling(lines) -> Float64
 
 Parses *Fixed Mass Scaling to obtain mass scaling factor.
@@ -849,7 +849,7 @@ function parseMassScaling(lines::Vector{String})
     return mass_scaling
 end
 
-"""
+@doc raw"""
     parseBC(lines, AMPLITUDE, INSTANCE, PART, NSET) -> Vector{BCType}
 
 Parses *Boundary blocks, linking to amplitude if specified.
@@ -965,7 +965,7 @@ function parseBC(lines::Vector{String},
     return BC
 end
 
-"""
+@doc raw"""
     parseIC(lines, INSTANCE, PART, NSET) -> Vector{ICType}
 
 Parses *Initial Conditions blocks.
@@ -1049,7 +1049,7 @@ function parseIC(lines::Vector{String},
     return IC
 end
 
-"""
+@doc raw"""
     parseContactFlag(lines) -> Int
 
 Checks if *Contact or *Contact Inclusions (with self-contact) is present.
@@ -1078,7 +1078,7 @@ function parseContactFlag(lines::Vector{String})
     return contact_flag
 end
 
-"""
+@doc raw"""
     parseContactPairs(lines, SURFACE) -> Vector{CPType}
 
 Parses *Contact Pair blocks into CPType.
@@ -1124,7 +1124,7 @@ end
 #                  Master read function                 #
 #########################################################
 
-"""
+@doc raw"""
     readInpFile(fname::String) -> ModelType
 
 Top-level function that reads all lines of the .inp file, then parses out
