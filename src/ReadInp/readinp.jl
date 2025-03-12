@@ -720,7 +720,7 @@ function parse_global_model_data(lines::Vector{String}, parts::Vector{PartType},
                 offset_ = [parse(Float64, ss_trans[1]),
                            parse(Float64, ss_trans[2]),
                            parse(Float64, ss_trans[3])]'  # row vector
-                coordmat_i = coordmat_i + offset_ * ones(1, size(coordmat_i, 2))
+                coordmat_i .= coordmat_i .+ offset_ .* ones(1, size(coordmat_i, 2))
             elseif length(ss_trans) == 7
                 nv = [parse(Float64, ss_trans[4]) - parse(Float64, ss_trans[1]),
                       parse(Float64, ss_trans[5]) - parse(Float64, ss_trans[2]),
