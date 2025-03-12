@@ -8,6 +8,7 @@ makedocs(;
     authors="yolhan83 <yolhan@laposte.net>",
     sitename="Hakai_Project.jl",
     format=Documenter.HTML(;
+        canonical = "https://github.com/yolhan83/Hakai_Project.jl",
         edit_link="master",
         assets=String[],
     ),
