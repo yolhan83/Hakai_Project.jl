@@ -43,6 +43,6 @@ end
 Read the input file (from ARGS), run the simulation and produce output.
 """
 function main(file)
-    res = run_simulation(file)
+    res = runHakai(file)
 end
 end

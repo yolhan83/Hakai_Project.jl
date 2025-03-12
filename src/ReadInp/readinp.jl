@@ -1,136 +1,95 @@
-# =============================================================================
-# Type Definitions
-# =============================================================================
+#= 
+HAKAI - A 3-dimensional finite element program
+Copyright (c) 2024 Yozo Yugen
 
-"""
-    NsetType
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or any later version.
 
-Represents a node set with its name, associated instance and part information, and the node indices.
-"""
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see http://www.gnu.org/licenses/.
+=#
+
+using LinearAlgebra
+
+#########################################################
+#               Data structures (unchanged)             #
+#########################################################
+
 mutable struct NsetType
     name::String
     instance_name::String
     instance_id::Int
     part_name::String
     part_id::Int
-    nodes::Vector{Int}
+    nodes::Array{Int,1}
 end
 
-"""
-    ELsetType
-
-Represents an element set with its name, associated instance and part information, and the element indices.
-"""
 mutable struct ELsetType
     name::String
     instance_name::String
     instance_id::Int
     part_name::String
     part_id::Int
-    elements::Vector{Int}
+    elements::Array{Int,1}
 end
 
-"""
-    SurfaceType
-
-Represents a surface defined by a name, a list of element set names, an instance id, and the surface element indices.
-"""
 mutable struct SurfaceType
     name::String
-    elset_name::Vector{String}
+    elset_name::Array{String,1}
     instance_id::Int
-    elements::Vector{Int}
+    elements::Array{Int,1}
 end
 
-"""
-    PartType
-
-Represents a part with nodes, elements, node sets, and material information.
-
-Fields:
-- `name`: Part name.
-- `nNode`: Number of nodes.
-- `coordmat`: Node coordinate matrix (stored column‐major).
-- `nElement`: Number of elements.
-- `elementmat`: Element connectivity matrix (stored column‐major).
-- `NSET`: Vector of node sets defined in the part.
-- `material_name`: Name of the material assigned.
-- `material_id`: Material id (assigned later).
-"""
 mutable struct PartType
     name::String
     nNode::Int
     coordmat::Array{Float64,2}
     nElement::Int
     elementmat::Array{Int,2}
-    NSET::Vector{NsetType}
+    NSET::Array{NsetType,1}
     material_name::String
     material_id::Int
 end
 
-"""
-    InstanceType
-
-Represents an instance of a part with its own translation and offset information, and connectivity indices.
-
-Fields:
-- `name`: Instance name.
-- `part_name`: Name of the part to which the instance refers.
-- `part_id`: Index of the part in the PART array.
-- `material_id`: Material id assigned from the part.
-- `translate`: List of translation/rotation directives.
-- `node_offset`: Global offset for nodes.
-- `nNode`: Number of nodes in the instance.
-- `element_offset`: Global offset for elements.
-- `nElement`: Number of elements in the instance.
-- `elements`: Element indices (local numbering).
-- `surfaces`, `sorted_surfaces`, `surfaces_eleid`, `c_triangles`, `c_triangles_eleid`, `c_nodes`: Additional contact/surface data.
-"""
 mutable struct InstanceType
     name::String
     part_name::String
     part_id::Int
     material_id::Int
-    translate::Vector{String}
+    translate::Array{String,1}
     node_offset::Int
     nNode::Int
     element_offset::Int
     nElement::Int
-    elements::Vector{Int}
+    elements::Array{Int,1}
     surfaces::Array{Int,2}
     sorted_surfaces::Array{Int,2}
-    surfaces_eleid::Vector{Int}
+    surfaces_eleid::Array{Int,1}
     c_triangles::Array{Int,2}
-    c_triangles_eleid::Vector{Int}
-    c_nodes::Vector{Int}
+    c_triangles_eleid::Array{Int,1}
+    c_nodes::Array{Int,1}
 end
 
-"""
-    AmplitudeType
-
-Represents an amplitude curve with its name, time values, and corresponding amplitude values.
-"""
 mutable struct AmplitudeType
     name::String
-    time::Vector{Float64}
-    value::Vector{Float64}
+    time::Array{Float64,1}
+    value::Array{Float64,1}
 end
 
-"""
-    MaterialType
-
-Represents material properties including density, elasticity, plasticity (if any), ductile failure, etc.
-
-Fields:
-- `plastic` and `ductile` matrices store data; note that large heterogeneous arrays (e.g. Vector{Any}) are avoided.
-"""
 mutable struct MaterialType
     name::String
     density::Float64
     young::Float64
     poisson::Float64
     plastic::Array{Float64,2}
-    Hd::Vector{Float64}
+    Hd::Array{Float64,1}
     fracture_flag::Int
     failure_stress::Float64
     ductile::Array{Float64,2}
@@ -138,70 +97,48 @@ mutable struct MaterialType
     Dmat::Array{Float64,2}
 end
 
-"""
-    BCType
-
-Represents a boundary condition with the node set name, degrees of freedom (dof) constraints,
-values, amplitude name and an associated amplitude curve.
-"""
 mutable struct BCType
     Nset_name::String
-    dof::Vector{Vector{Int}}
-    value::Vector{Float64}
+    dof::Array{Array{Int,1},1}
+    value::Vector{Float64} 
     amp_name::String
     amplitude::AmplitudeType
 end
 
-"""
-    ICType
-
-Represents an initial condition with the node set name, type, degrees of freedom, and prescribed values.
-"""
 mutable struct ICType
     Nset_name::String
     type::String
-    dof::Vector{Vector{Int}}
+    dof::Array{Array{Int,1},1}
     value::Vector{Float64}
 end
 
-"""
-    CPType
-
-Represents a contact pair (interaction) between two surfaces with related element, triangle, and node data.
-"""
 mutable struct CPType
     name::String
     surface_name_1::String
     surface_name_2::String
     instance_id_1::Int
     instance_id_2::Int
-    elements_1::Vector{Int}
-    elements_2::Vector{Int}
+    elements_1::Array{Int,1}
+    elements_2::Array{Int,1}
     c_triangles_1::Array{Int,2}
     c_triangles_2::Array{Int,2}
-    c_triangles_eleid_1::Vector{Int}
-    c_triangles_eleid_2::Vector{Int}
-    c_nodes_1::Vector{Int}
-    c_nodes_2::Vector{Int}
+    c_triangles_eleid_1::Array{Int,1}
+    c_triangles_eleid_2::Array{Int,1}
+    c_nodes_1::Array{Int,1}
+    c_nodes_2::Array{Int,1}
 end
 
-"""
-    ModelType
-
-Represents the global model, containing all parts, instances, node/element sets, surfaces, amplitudes,
-materials, boundary conditions, initial conditions, contact pairs, and overall connectivity and dynamic parameters.
-"""
 mutable struct ModelType
-    PART::Vector{PartType}
-    INSTANCE::Vector{InstanceType}
-    NSET::Vector{NsetType}
-    ELSET::Vector{ELsetType}
-    SURFACE::Vector{SurfaceType}
-    AMPLITUDE::Vector{AmplitudeType}
-    MATERIAL::Vector{MaterialType}
-    BC::Vector{BCType}
-    IC::Vector{ICType}
-    CP::Vector{CPType}
+    PART::Array{PartType,1}
+    INSTANCE::Array{InstanceType,1}
+    NSET::Array{NsetType,1}
+    ELSET::Array{ELsetType,1}
+    SURFACE::Array{SurfaceType,1}
+    AMPLITUDE::Array{AmplitudeType,1}
+    MATERIAL::Array{MaterialType,1}
+    BC::Array{BCType,1}
+    IC::Array{ICType,1}
+    CP::Array{CPType,1}
     nNode::Int
     coordmat::Array{Float64,2}
     nElement::Int
@@ -214,143 +151,161 @@ mutable struct ModelType
     contact_flag::Int
 end
 
-# =============================================================================
-# Helper Functions
-# =============================================================================
+#########################################################
+#          Helper Functions for Reading/Parsing         #
+#########################################################
 
 """
-    read_file_lines(fname::String) -> Vector{String}
+    readFile(fname::String) -> Vector{String}
 
-Read lines from the file named `fname` and return them as a vector of strings.
+Reads the entire input file into a vector of lines.
 """
-function read_file_lines(fname::String)
-    open(fname, "r") do f
-        return readlines(f)
-    end
+function readFile(fname::String)
+    f = open(fname, "r")
+    lines = readlines(f)
+    close(f)
+    return lines
 end
 
 """
-    find_indices(lines::Vector{String}, pattern::String) -> Vector{Int}
+    findLineIndices(lines::Vector{String}, pattern::String) -> Vector{Int}
 
-Return the indices of lines that contain the specified `pattern`.
+Returns all line indices in `lines` that contain the given `pattern`.
 """
-function find_indices(lines::Vector{String}, pattern::String)
-    indices = Int[]
+function findLineIndices(lines::Vector{String}, pattern::String)
+    idx = Int[]
     for (i, line) in enumerate(lines)
         if occursin(pattern, line)
-            push!(indices, i)
+            push!(idx, i)
         end
     end
-    return indices
+    return idx
 end
 
-# -----------------------------------------------------------------------------
-# Parsing Functions for Each Section
-# -----------------------------------------------------------------------------
-
 """
-    parse_parts(lines::Vector{String}) -> Vector{PartType}
+    parseParts(lines::Vector{String}) -> Vector{PartType}
 
-Parse the part sections from `lines` and return a vector of `PartType`.
+Parses all *Part sections (with nodes/elements) into an array of `PartType`.
 """
-function parse_parts(lines::Vector{String})
+function parseParts(lines::Vector{String})
     n = length(lines)
-    part_indices = find_indices(lines, "*Part, name=")
-    n_part = length(part_indices)
-    parts = PartType[]
-    for k in 1:n_part
-        # Create a default part object
-        part = PartType("", 0, zeros(Float64, 1,1), 0, zeros(Int,1,1), NsetType[], "", 0)
-        push!(parts, part)
-        # Parse part name
-        s = replace(lines[part_indices[k]], " " => "")
+    # Find lines with "*Part, name="
+    part_index = Int[]
+    for i in 1:n
+        if occursin("*Part, name=", lines[i])
+            push!(part_index, i)
+        end
+    end
+    nPart = length(part_index)
+
+    PART = PartType[]
+    for k in 1:nPart
+        p = PartType("", 0, zeros(1,1), 0, zeros(Int,1,1), NsetType[], "", 0)
+        push!(PART, p)
+
+        # Extract part name
+        s = replace(lines[part_index[k]], " " => "")
         ss = split(s, ",", keepempty=false)
-        parts[k].name = ss[2][findfirst("name=", ss[2]).stop+1:end]
-        # --- Node parsing ---
-        node_index = 0
-        for i in part_indices[k]:n
+        ss = ss[2]
+        name_ = ss[ findfirst("name=", ss).stop+1 : end ]
+        PART[k].name = name_
+
+        #----- Find and parse *Node block -----
+        index_node = 0
+        for i in part_index[k]:n
             if occursin("*Node", lines[i])
-                node_index = i
+                index_node = i
                 break
             end
         end
-        n_node = 0
-        for i in node_index+1:n
-            if occursin("*", lines[i])
+
+        # Count how many nodes
+        nNode = 0
+        for i in (index_node+1):n
+            if i > n || occursin("*", lines[i])
                 break
             end
-            n_node += 1
+            nNode += 1
         end
-        parts[k].nNode = n_node
-        coordmat = zeros(Float64, n_node, 3)
-        for i in 1:n_node
-            if occursin("*", lines[node_index+i])
+        PART[k].nNode = nNode
+        coordmat = zeros(nNode, 3)
+        for i in 1:nNode
+            if occursin("*", lines[index_node + i])
                 break
             end
-            s_node = replace(lines[node_index+i], " " => "")
-            ss_node = split(s_node, ",", keepempty=false)
-            coordmat[i,1] = parse(Float64, ss_node[2])
-            coordmat[i,2] = parse(Float64, ss_node[3])
-            coordmat[i,3] = parse(Float64, ss_node[4])
+            s = replace(lines[index_node + i], " " => "")
+            ss = split(s, ",", keepempty=false)
+            coordmat[i,1] = parse(Float64, ss[2])
+            coordmat[i,2] = parse(Float64, ss[3])
+            coordmat[i,3] = parse(Float64, ss[4])
         end
-        parts[k].coordmat = coordmat'  # store as column major
-        # --- Element parsing ---
-        elem_index = 0
-        for i in part_indices[k]:n
+        PART[k].coordmat = coordmat'  # make it 3 x nNode
+
+        #----- Find and parse *Element block -----
+        index_elem = 0
+        for i in part_index[k]:n
             if occursin("*Element", lines[i])
-                elem_index = i
+                index_elem = i
                 break
             end
         end
-        n_elem = 0
-        for i in elem_index+1:n
-            if occursin("*", lines[i])
+
+        nElement = 0
+        for i in (index_elem+1):n
+            if i > n || occursin("*", lines[i])
                 break
             end
-            n_elem += 1
+            nElement += 1
         end
-        parts[k].nElement = n_elem
-        elementmat = zeros(Int, n_elem, 8)
-        for i in 1:n_elem
-            if occursin("*", lines[elem_index+i])
+        PART[k].nElement = nElement
+        elementmat = zeros(Int, nElement, 8)
+
+        for i in 1:nElement
+            if occursin("*", lines[index_elem + i])
                 break
             end
-            s_elem = replace(lines[elem_index+i], " " => "")
-            ss_elem = split(s_elem, ",", keepempty=false)
+            s = replace(lines[index_elem + i], " " => "")
+            ss = split(s, ",", keepempty=false)
             for j in 1:8
-                elementmat[i,j] = parse(Int, ss_elem[1+j])
+                elementmat[i, j] = parse(Int, ss[1 + j])
             end
         end
-        parts[k].elementmat = elementmat'
-        # --- Nset parsing (within part) ---
-        nset_idxs = Int[]
-        for i in part_indices[k]:n
+        PART[k].elementmat = elementmat'
+
+        #----- Find and parse any *Nset generate block inside Part -----
+        nset_index_local = Int[]
+        for i in part_index[k]:n
             if occursin("*Nset", lines[i]) && occursin("generate", lines[i])
-                push!(nset_idxs, i)
+                push!(nset_index_local, i)
             end
             if occursin("*End Part", lines[i])
                 break
             end
         end
-        for i in eachindex(nset_idxs)
+
+        for idx_ns in nset_index_local
             ns = NsetType("", "", 0, "", 0, zeros(Int,1))
-            push!(parts[k].NSET, ns)
-            s_nset = replace(lines[nset_idxs[i]], " " => "")
-            ss_nset = split(s_nset, ",", keepempty=false)
-            parts[k].NSET[end].name = ss_nset[2][findfirst("nset=", ss_nset[2]).stop+1:end]
-            s_nodes = replace(lines[nset_idxs[i]+1], " " => "")
-            ss_nodes = split(s_nodes, ",", keepempty=false)
-            a = [j for j in parse(Int, ss_nodes[1]):parse(Int, ss_nodes[3]):parse(Int, ss_nodes[2])]
-            parts[k].NSET[end].nodes = a
+            push!(PART[k].NSET, ns)
+            s = replace(lines[idx_ns], " " => "")
+            ss = split(s, ",", keepempty=false)
+            ss = ss[2]
+            name_ = ss[ findfirst("nset=", ss).stop+1 : end ]
+            ns.name = name_
+            s = replace(lines[idx_ns + 1], " " => "")
+            ss_gen = split(s, ",", keepempty=false)
+            a = [j for j in parse(Int, ss_gen[1]):parse(Int, ss_gen[3]):parse(Int, ss_gen[2])]
+            ns.nodes = a
         end
-        # --- Material assignment parsing ---
-        for i in part_indices[k]:n
+
+        #----- Extract material name from *Solid Section -----
+        for i in part_index[k]:n
             if occursin("*Solid Section", lines[i])
-                s_sec = replace(lines[i], " " => "")
-                ss_sec = split(s_sec, ",", keepempty=false)
-                for token in ss_sec
-                    if occursin("material=", token)
-                        parts[k].material_name = token[findfirst("material=", token).stop+1:end]
+                s = replace(lines[i], " " => "")
+                ss = split(s, ",", keepempty=false)
+                for sss in ss
+                    if occursin("material=", sss)
+                        name_ = sss[ findfirst("material=", sss).stop+1 : end ]
+                        PART[k].material_name = name_
                         break
                     end
                 end
@@ -358,415 +313,515 @@ function parse_parts(lines::Vector{String})
             end
         end
     end
-    return parts
+
+    return PART
 end
 
 """
-    parse_instances(lines::Vector{String}, parts::Vector{PartType}) -> Vector{InstanceType}
+    parseInstances(lines, PART) -> Vector{InstanceType}
 
-Parse instance sections from `lines` and associate each with its part.
+Finds all *Instance blocks and populates an array of InstanceType.
 """
-function parse_instances(lines::Vector{String}, parts::Vector{PartType})
+function parseInstances(lines::Vector{String}, PART::Vector{PartType})
     n = length(lines)
-    instance_idxs = find_indices(lines, "*Instance")
-    instance_num = length(instance_idxs)
-    instances = InstanceType[]
+    instance_index = findLineIndices(lines, "*Instance")
+    instance_num = length(instance_index)
+
+    INSTANCE = InstanceType[]
     for k in 1:instance_num
-        inst = InstanceType("", "", 0, 0, String[], 0, 0, 0, 0, zeros(Int,0), zeros(Int,0,0), zeros(Int,0,0), zeros(Int,0), zeros(Int,0,0), zeros(Int,0), zeros(Int,0))
-        push!(instances, inst)
-        s = replace(lines[instance_idxs[k]], " " => "")
+        inst = InstanceType("", "", 0, 0, String[], 0, 0, 0, 0, Int[], zeros(Int,0,0), zeros(Int,0,0), Int[], zeros(Int,0,0), Int[], Int[])
+        push!(INSTANCE, inst)
+
+        # parse instance name, part name
+        s = replace(lines[instance_index[k]], " " => "")
         ss = split(s, ",", keepempty=false)
-        instances[end].name = ss[2][findfirst("name=", ss[2]).stop+1:end]
-        instances[end].part_name = ss[3][findfirst("part=", ss[3]).stop+1:end]
-        for (i, part) in enumerate(parts)
-            if part.name == instances[end].part_name
-                instances[end].part_id = i
+        # name=
+        name_ = ss[2]
+        name_ = name_[ findfirst("name=", name_).stop+1 : end ]
+        inst.name = name_
+        # part=
+        part_ = ss[3]
+        part_ = part_[ findfirst("part=", part_).stop+1 : end ]
+        inst.part_name = part_
+
+        # find matching part index
+        for i in 1:length(PART)
+            if PART[i].name == inst.part_name
+                inst.part_id = i
                 break
             end
         end
+
+        # parse translate lines until *End Instance
         translate = String[]
-        for i in instance_idxs[k]+1:n
-            if occursin("*End Instance", lines[i])
+        for line_i in (instance_index[k]+1):n
+            if occursin("*End Instance", lines[line_i])
                 break
             end
-            push!(translate, replace(lines[i], " " => ""))
+            push!(translate, replace(lines[line_i], " " => ""))
         end
-        instances[end].translate = translate
+        inst.translate = translate
     end
-    return instances
+    return INSTANCE
 end
 
 """
-    parse_global_nsets(lines::Vector{String}, instances::Vector{InstanceType}) -> Vector{NsetType}
+    parseGlobalNsets(lines, INSTANCE) -> Vector{NsetType}
 
-Parse global node set sections (with instance information) from `lines`.
+Parses any *Nset with "instance=" at the global level.
 """
-function parse_global_nsets(lines::Vector{String}, instances::Vector{InstanceType})
+function parseGlobalNsets(lines::Vector{String}, INSTANCE::Vector{InstanceType})
+    nset_index = Int[]
     n = length(lines)
-    nset_idxs = Int[]
     for i in 1:n
         if occursin("*Nset", lines[i]) && occursin("instance=", lines[i])
-            push!(nset_idxs, i)
+            push!(nset_index, i)
         end
     end
-    global_nsets = NsetType[]
-    for k in eachindex(nset_idxs)
-        ns = NsetType("", "", 0, "", 0, zeros(Int,1))
-        push!(global_nsets, ns)
-        s = replace(lines[nset_idxs[k]], " " => "")
+
+    nset_num = length(nset_index)
+    NSET = NsetType[]
+    for k in 1:nset_num
+        ns = NsetType("", "", 0, "", 0, Int[])
+        push!(NSET, ns)
+
+        s = replace(lines[nset_index[k]], " " => "")
         ss = split(s, ",", keepempty=false)
-        global_nsets[end].name = ss[2][findfirst("nset=", ss[2]).stop+1:end]
-        global_nsets[end].instance_name = ss[3][findfirst("instance=", ss[3]).stop+1:end]
-        for (i, inst) in enumerate(instances)
-            if inst.name == global_nsets[end].instance_name
-                global_nsets[end].part_name = inst.part_name
-                global_nsets[end].part_id = inst.part_id
-                global_nsets[end].instance_id = i
-                break
+        # nset name
+        name_ = ss[2]
+        name_ = name_[ findfirst("nset=", name_).stop+1 : end ]
+        ns.name = name_
+        # instance name
+        inst_ = ss[3]
+        inst_ = inst_[ findfirst("instance=", inst_).stop+1 : end ]
+        ns.instance_name = inst_
+
+        # find instance ID
+        for i in 1:length(INSTANCE)
+            if ns.instance_name == INSTANCE[i].name
+                ns.part_name = INSTANCE[i].part_name
+                ns.part_id = INSTANCE[i].part_id
+                ns.instance_id = i
             end
         end
+
+        # parse nodes
         a = Int[]
-        index = nset_idxs[k]
-        ss_parts = split(s, ",", keepempty=false)
-        if length(ss_parts) == 4 && ss_parts[4] == "generate"
-            s_line = replace(lines[index+1], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            a = [j for j in parse(Int, ss_line[1]):parse(Int, ss_line[3]):parse(Int, ss_line[2])]
+        idx = nset_index[k]
+        # check generate
+        sgen = split(s, ",", keepempty=false)
+        if length(sgen) == 4 && sgen[4] == "generate"
+            line_ = replace(lines[idx+1], " " => "")
+            ss2 = split(line_, ",", keepempty=false)
+            a = [j for j in parse(Int, ss2[1]):parse(Int, ss2[3]):parse(Int, ss2[2])]
         else
-            for i in index+1:n
-                if occursin("*", lines[i])
+            # read subsequent lines until next '*'
+            for i in (idx+1):n
+                if i>n || occursin("*", lines[i])
                     break
                 end
-                s_line = replace(lines[i], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                for token in ss_line
-                    if !isempty(token)
-                        push!(a, parse(Int, token))
+                l = replace(lines[i], " " => "")
+                tokens = split(l, ",", keepempty=false)
+                for t in tokens
+                    if !isempty(t)
+                        push!(a, parse(Int, t))
                     end
                 end
             end
         end
-        global_nsets[end].nodes = a
+        ns.nodes = a
     end
-    return global_nsets
+    return NSET
 end
 
 """
-    parse_elsets(lines::Vector{String}, instances::Vector{InstanceType}) -> Vector{ELsetType}
+    parseGlobalElsets(lines, INSTANCE) -> Vector{ELsetType}
 
-Parse element set sections from `lines` and return a vector of `ELsetType`.
+Parses any *Elset with "instance=" at the global level.
 """
-function parse_elsets(lines::Vector{String}, instances::Vector{InstanceType})
+function parseGlobalElsets(lines::Vector{String}, INSTANCE::Vector{InstanceType})
     n = length(lines)
-    elset_idxs = Int[]
+    elset_index = Int[]
     for i in 1:n
         if occursin("*Elset", lines[i]) && occursin("instance=", lines[i])
-            push!(elset_idxs, i)
+            push!(elset_index, i)
         end
     end
-    elsets = ELsetType[]
-    for k in eachindex(elset_idxs)
-        elset = ELsetType("", "", 0, "", 0, zeros(Int,1))
-        push!(elsets, elset)
-        s = replace(lines[elset_idxs[k]], " " => "")
+
+    ELSET = ELsetType[]
+    for idx in elset_index
+        elset_obj = ELsetType("", "", 0, "", 0, Int[])
+        push!(ELSET, elset_obj)
+
+        s = replace(lines[idx], " " => "")
         ss = split(s, ",", keepempty=false)
-        elsets[end].name = ss[2][findfirst("elset=", ss[2]).stop+1:end]
+        # name
+        name_ = ss[2]
+        name_ = name_[ findfirst("elset=", name_).stop+1 : end ]
+        elset_obj.name = name_
+
+        # instance name can appear in either ss[3] or ss[4]
+        # Check
         if length(ss) >= 3 && occursin("instance=", ss[3])
-            elsets[end].instance_name = ss[3][findfirst("instance=", ss[3]).stop+1:end]
+            name_ = ss[3]
+            name_ = name_[ findfirst("instance=", name_).stop+1 : end ]
+            elset_obj.instance_name = name_
         elseif length(ss) >= 4 && occursin("instance=", ss[4])
-            elsets[end].instance_name = ss[4][findfirst("instance=", ss[4]).stop+1:end]
+            name_ = ss[4]
+            name_ = name_[ findfirst("instance=", name_).stop+1 : end ]
+            elset_obj.instance_name = name_
         end
-        for (i, inst) in enumerate(instances)
-            if inst.name == elsets[end].instance_name
-                elsets[end].part_name = inst.part_name
-                elsets[end].part_id = inst.part_id
-                elsets[end].instance_id = i
-                break
+
+        # find instance ID
+        for i in 1:length(INSTANCE)
+            if elset_obj.instance_name == INSTANCE[i].name
+                elset_obj.part_name = INSTANCE[i].part_name
+                elset_obj.part_id   = INSTANCE[i].part_id
+                elset_obj.instance_id = i
             end
         end
+
+        # gather elements
         a = Int[]
-        index = elset_idxs[k]
-        if length(ss) == 4 && ss[4] == "generate"
-            s_line = replace(lines[index+1], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            a = [j for j in parse(Int, ss_line[1]):parse(Int, ss_line[3]):parse(Int, ss_line[2])]
-        elseif length(ss) == 5 && ss[3] == "internal" && ss[5] == "generate"
-            s_line = replace(lines[index+1], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            a = [j for j in parse(Int, ss_line[1]):parse(Int, ss_line[3]):parse(Int, ss_line[2])]
-        elseif length(ss) == 4 && ss[3] == "internal"
-            for i in index+1:n
-                if occursin("*", lines[i])
+        ssplit = split(s, ",", keepempty=false)
+        idx_plus1 = idx + 1
+
+        is_generate = (length(ssplit) >= 4 && ssplit[end] == "generate") ||
+                      (length(ssplit) >= 5 && ssplit[3] == "internal" && ssplit[end] == "generate")
+
+        if is_generate
+            gen_line = replace(lines[idx_plus1], " " => "")
+            ss2 = split(gen_line, ",", keepempty=false)
+            a = [j for j in parse(Int, ss2[1]):parse(Int, ss2[3]):parse(Int, ss2[2])]
+        else
+            # read subsequent lines until next '*'
+            for i in idx_plus1: length(lines)
+                if i>length(lines) || occursin("*", lines[i])
                     break
                 end
-                s_line = replace(lines[i], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                for token in ss_line
-                    if !isempty(token)
-                        push!(a, parse(Int, token))
+                line_ = replace(lines[i], " " => "")
+                tokens = split(line_, ",", keepempty=false)
+                for t in tokens
+                    if !isempty(t)
+                        push!(a, parse(Int, t))
                     end
                 end
             end
         end
-        elsets[end].elements = a
+        elset_obj.elements = a
     end
-    return elsets
+    return ELSET
 end
 
 """
-    parse_surfaces(lines::Vector{String}, elsets::Vector{ELsetType}) -> Vector{SurfaceType}
+    parseSurfaces(lines, ELSET) -> Vector{SurfaceType}
 
-Parse surface sections from `lines` and return a vector of `SurfaceType`.
+Parses *Surface blocks and populates SurfaceType.
 """
-function parse_surfaces(lines::Vector{String}, elsets::Vector{ELsetType})
+function parseSurfaces(lines::Vector{String}, ELSET::Vector{ELsetType})
     n = length(lines)
-    surface_idxs = find_indices(lines, "*Surface,")
-    surfaces = SurfaceType[]
-    for k in eachindex(surface_idxs)
-        surf = SurfaceType("", String[], 0, zeros(Int,1))
-        push!(surfaces, surf)
-        s = replace(lines[surface_idxs[k]], " " => "")
+    surface_index = findLineIndices(lines, "*Surface,")
+    SURFACE = SurfaceType[]
+
+    for idx in surface_index
+        surf = SurfaceType("", String[], 0, Int[])
+        push!(SURFACE, surf)
+
+        s = replace(lines[idx], " " => "")
         ss = split(s, ",", keepempty=false)
-        surfaces[end].name = ss[3][findfirst("name=", ss[3]).stop+1:end]
-        index = surface_idxs[k]
+        # name
+        name_ = ss[3]
+        name_ = name_[ findfirst("name=", name_).stop+1 : end ]
+        surf.name = name_
+
+        # read subsequent lines until next '*'
         a = Int[]
         c = 1
-        for i in index+1:n
-            if occursin("*", lines[i])
-                break
-            end
-            s_line = replace(lines[i], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            push!(surfaces[end].elset_name, ss_line[1])
-            for el in elsets
-                if surfaces[end].elset_name[c] == el.name
-                    surfaces[end].instance_id = el.instance_id
-                    push!(a, el.elements)
+        line_idx = idx + 1
+        while line_idx <= n && !occursin("*", lines[line_idx])
+            l = replace(lines[line_idx], " " => "")
+            tokens = split(l, ",", keepempty=false)
+            # tokens[1] is elset name
+            push!(surf.elset_name, tokens[1])
+
+            # find matching elset
+            for j in 1:length(ELSET)
+                if surf.elset_name[c] == ELSET[j].name
+                    surf.instance_id = ELSET[j].instance_id
+                    append!(a, ELSET[j].elements)
                 end
             end
             c += 1
+            line_idx += 1
         end
-        surfaces[end].elements = unique(sort(a))
+        surf.elements = unique(sort(a))
     end
-    return surfaces
+    return SURFACE
 end
 
 """
-    parse_amplitudes(lines::Vector{String}) -> Vector{AmplitudeType}
+    buildGlobalModel!(PART, INSTANCE) -> (nNode, coordmat, nElement, elementmat)
 
-Parse amplitude sections from `lines` and return a vector of `AmplitudeType`.
+Given the PART and INSTANCE arrays, iterates over each instance to:
+  - apply translations/rotations
+  - assemble global coord and element arrays
+Returns the global node count, global coordinate matrix, global element count, and global element matrix.
 """
-function parse_amplitudes(lines::Vector{String})
-    n = length(lines)
-    amplitude_idxs = find_indices(lines, "*Amplitude")
-    amplitudes = AmplitudeType[]
-    for k in eachindex(amplitude_idxs)
-        amp = AmplitudeType("", zeros(Float64,1), zeros(Float64,1))
-        push!(amplitudes, amp)
-        s = replace(lines[amplitude_idxs[k]], " " => "")
-        ss = split(s, ",", keepempty=false)
-        amplitudes[end].name = ss[2][findfirst("name=", ss[2]).stop+1:end]
-        index = amplitude_idxs[k]
-        for i in index+1:n
-            if occursin("*", lines[i])
-                break
+function buildGlobalModel!(PART::Vector{PartType}, INSTANCE::Vector{InstanceType})
+    nNode = 0
+    nElement = 0
+    coordmat_global = Float64[]
+    elementmat_global = Int[]
+
+    for (i, inst) in enumerate(INSTANCE)
+        part_id = inst.part_id
+        coordmat_i = copy(PART[part_id].coordmat)
+        inst.node_offset = nNode
+        inst.element_offset = nElement
+        inst.nNode    = PART[part_id].nNode
+        inst.nElement = PART[part_id].nElement
+        inst.elements = collect(1:inst.nElement)
+
+        # Compose transformations from end to front
+        T = Matrix(I, 3, 3)
+        for tr in reverse(inst.translate)
+            ss = split(tr, ",", keepempty=false)
+            # translation
+            if length(ss) == 3
+                offset_ = [parse(Float64, ss[1]),
+                           parse(Float64, ss[2]),
+                           parse(Float64, ss[3])]
+                coordmat_i .= coordmat_i .+ offset_ * ones(1, size(coordmat_i, 2))
+
+            # rotation
+            elseif length(ss) == 7
+                # axis from (x1,y1,z1) to (x2,y2,z2), plus angle
+                x1, y1, z1 = parse.(Float64, ss[1:3])
+                x2, y2, z2 = parse.(Float64, ss[4:6])
+                angle_deg  = parse(Float64, ss[7])
+                nv = [x2 - x1, y2 - y1, z2 - z1]
+                nv ./= norm(nv)
+                n1, n2, n3 = nv
+                d = angle_deg / 180.0 * π
+
+                R = [
+                    n1*n1*(1-cos(d))+cos(d)   n1*n2*(1-cos(d))-n3*sin(d)  n1*n3*(1-cos(d))+n2*sin(d);
+                    n1*n2*(1-cos(d))+n3*sin(d)  n2*n2*(1-cos(d))+cos(d)   n2*n3*(1-cos(d))-n1*sin(d);
+                    n1*n3*(1-cos(d))-n2*sin(d)  n2*n3*(1-cos(d))+n1*sin(d)  n3*n3*(1-cos(d))+cos(d)
+                ]
+                coordmat_i .= R * coordmat_i
             end
-            s_line = replace(lines[i], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            time_vals = Float64[]
-            value_vals = Float64[]
-            for j in 1:Int(length(ss_line)/2)
-                push!(time_vals, parse(Float64, ss_line[2*j-1]))
-                push!(value_vals, parse(Float64, ss_line[2*j]))
-            end
-            amplitudes[end].time = time_vals
-            amplitudes[end].value = value_vals
         end
+
+        # element offset
+        elementmat_i = PART[part_id].elementmat .+ nNode
+
+        # append to global
+        if i == 1
+            coordmat_global = copy(vec(coordmat_i))   # store as vector, then reshape
+            elementmat_global = copy(vec(elementmat_i))
+        else
+            coordmat_global = vcat(coordmat_global, vec(coordmat_i))
+            elementmat_global = vcat(elementmat_global, vec(elementmat_i))
+        end
+
+        nNode    += PART[part_id].nNode
+        nElement += PART[part_id].nElement
     end
-    return amplitudes
+
+    # Reshape to final form
+    # Global coords are stored in a big vector. We want 3 x nNode
+    coordmat_final = reshape(coordmat_global, 3, nNode)
+    elementmat_final = reshape(elementmat_global, size(PART[1].elementmat,1), nElement)
+
+    return (nNode, coordmat_final, nElement, elementmat_final)
 end
 
 """
-    parse_materials(lines::Vector{String}, parts::Vector{PartType}) -> Vector{MaterialType}
+    parseAmplitudes(lines) -> Vector{AmplitudeType}
 
-Parse material sections from `lines` and return a vector of `MaterialType`. Also assign material IDs to parts.
+Parses *Amplitude blocks.
 """
-function parse_materials(lines::Vector{String}, parts::Vector{PartType})
-    n = length(lines)
-    material_idxs = find_indices(lines, "*Material")
-    materials = MaterialType[]
-    for k in eachindex(material_idxs)
-        mat = MaterialType("", 0.0, 0.0, 0.0, zeros(Float64, 0,0), zeros(Float64, 0), 0, 0.0, zeros(Float64, 0,0), 0.0, zeros(1,1))
-        push!(materials, mat)
-        s = replace(lines[material_idxs[k]], " " => "")
+function parseAmplitudes(lines::Vector{String})
+    amplitude_index = findLineIndices(lines, "*Amplitude")
+    AMPLITUDE = AmplitudeType[]
+
+    for idx in amplitude_index
+        amp = AmplitudeType("", Float64[], Float64[])
+        push!(AMPLITUDE, amp)
+        s = replace(lines[idx], " " => "")
         ss = split(s, ",", keepempty=false)
-        materials[end].name = ss[2][findfirst("name=", ss[2]).stop+1:end]
-        index = material_idxs[k]
-        plastic_index = 1
-        ductile_index = 1
-        for i in index+1:n
-            if occursin("*Material", lines[i]) || occursin("**", lines[i])
+        # name
+        name_ = ss[2]
+        name_ = name_[ findfirst("name=", name_).stop+1 : end ]
+        amp.name = name_
+
+        # parse data lines until next '*'
+        i = idx + 1
+        time_, value_ = Float64[], Float64[]
+        while i <= length(lines) && !occursin("*", lines[i])
+            line_ = replace(lines[i], " " => "")
+            tokens = split(line_, ",", keepempty=false)
+            # tokens come in pairs: time, value
+            for j in 1:2:length(tokens)
+                push!(time_, parse(Float64, tokens[j]))
+                push!(value_, parse(Float64, tokens[j+1]))
+            end
+            i += 1
+        end
+        amp.time = time_
+        amp.value = value_
+    end
+
+    return AMPLITUDE
+end
+
+"""
+    parseMaterials(lines) -> Vector{MaterialType}
+
+Parses *Material blocks.
+"""
+function parseMaterials(lines::Vector{String})
+    material_index = findLineIndices(lines, "*Material")
+    MATERIAL = MaterialType[]
+
+    for idx in material_index
+        mat = MaterialType("", 0.0, 0.0, 0.0, zeros(Float64,0,0), Float64[], 0, 0.0, zeros(Float64,0,0), 0.0, zeros(1,1))
+        push!(MATERIAL, mat)
+
+        s = replace(lines[idx], " " => "")
+        ss = split(s, ",", keepempty=false)
+        # name
+        name_ = ss[2]
+        name_ = name_[ findfirst("name=", name_).stop+1 : end ]
+        mat.name = name_
+
+        # keep track of lines for plastic/ductile blocks
+        plastic_index   = 0
+        ductile_index   = 0
+
+        i = idx + 1
+        while i <= length(lines)
+            if i>length(lines) || occursin("*Material", lines[i]) || occursin("**", lines[i])
                 break
             end
             if occursin("*Density", lines[i])
-                s_line = replace(lines[i+1], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                materials[end].density = parse(Float64, ss_line[1])
-            end
-            if occursin("*Elastic", lines[i])
-                s_line = replace(lines[i+1], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                materials[end].young = parse(Float64, ss_line[1])
-                materials[end].poisson = parse(Float64, ss_line[2])
-            end
-            if occursin("*Plastic", lines[i])
+                s2 = replace(lines[i+1], " " => "")
+                ss2 = split(s2, ",", keepempty=false)
+                mat.density = parse(Float64, ss2[1])
+            elseif occursin("*Elastic", lines[i])
+                s2 = replace(lines[i+1], " " => "")
+                ss2 = split(s2, ",", keepempty=false)
+                mat.young = parse(Float64, ss2[1])
+                mat.poisson = parse(Float64, ss2[2])
+            elseif occursin("*Plastic", lines[i])
                 plastic_index = i
-            end
-            if occursin("*Damage Initiation", lines[i]) && occursin("criterion=DUCTILE", lines[i])
+            elseif occursin("*Damage Initiation", lines[i]) && occursin("criterion=DUCTILE", lines[i])
                 ductile_index = i
-                materials[end].fracture_flag = 1
+                mat.fracture_flag = 1
+            elseif occursin("*Tensile Failure", lines[i])
+                s2 = replace(lines[i+1], " " => "")
+                ss2 = split(s2, ",", keepempty=false)
+                mat.failure_stress = parse(Float64, ss2[1])
+                mat.fracture_flag = 1
             end
-            if occursin("*Tensile Failure", lines[i])
-                s_line = replace(lines[i+1], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                materials[end].failure_stress = parse(Float64, ss_line[1])
-                materials[end].fracture_flag = 1
-            end
+            i += 1
         end
-        plastic = Any[]
-        if plastic_index > material_idxs[k]
-            for i in plastic_index+1:n
-                if occursin("*", lines[i])
+
+        # parse plastic
+        if plastic_index > 0
+            plastic_data = Float64[]
+            j = plastic_index + 1
+            while j <= length(lines)
+                if occursin("*", lines[j])
                     break
                 end
-                s_line = replace(lines[i], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                push!(plastic, [parse(Float64, ss_line[1])  parse(Float64, ss_line[2])])
+                s3 = replace(lines[j], " " => "")
+                ss3 = split(s3, ",", keepempty=false)
+                push!(plastic_data, parse(Float64, ss3[1]))
+                push!(plastic_data, parse(Float64, ss3[2]))
+                j += 1
             end
-            m_ = zeros(Float64, length(plastic), 2)
-            for i in eachindex(plastic)
-                m_[i,1] = plastic[i][1]
-                m_[i,2] = plastic[i][2]
+            # reshape into Nx2
+            n_pairs = length(plastic_data) ÷ 2
+            mat.plastic = reshape(plastic_data, 2, n_pairs)'  # shape is n_pairs x 2
+
+            # compute hardening slopes
+            Hd_ = Float64[]
+            for i in 1:(size(mat.plastic,1)-1)
+                num   = mat.plastic[i+1,1] - mat.plastic[i,1]
+                denom = mat.plastic[i+1,2] - mat.plastic[i,2]
+                push!(Hd_, num/denom)
             end
-            materials[end].plastic = m_
+            mat.Hd = Hd_
         end
-        Hd = Float64[]
-        for i in 1:size(materials[end].plastic, 1)-1
-            v = (materials[end].plastic[i+1,1] - materials[end].plastic[i,1]) /
-                (materials[end].plastic[i+1,2] - materials[end].plastic[i,2])
-            push!(Hd, v)
-        end
-        materials[end].Hd = Hd
-        ductile = Any[]
-        if ductile_index > material_idxs[k]
-            for i in ductile_index+1:n
-                if occursin("*", lines[i])
+
+        # parse ductile
+        if ductile_index > 0
+            ductile_data = Float64[]
+            j = ductile_index + 1
+            while j <= length(lines)
+                if occursin("*", lines[j])
                     break
                 end
-                s_line = replace(lines[i], " " => "")
-                ss_line = split(s_line, ",", keepempty=false)
-                push!(ductile, [parse(Float64, ss_line[1])  parse(Float64, ss_line[2])  parse(Float64, ss_line[3])])
+                s3 = replace(lines[j], " " => "")
+                ss3 = split(s3, ",", keepempty=false)
+                push!(ductile_data, parse(Float64, ss3[1]))
+                push!(ductile_data, parse(Float64, ss3[2]))
+                push!(ductile_data, parse(Float64, ss3[3]))
+                j += 1
             end
-            m_d = zeros(Float64, length(ductile), 3)
-            for i in eachindex(ductile)
-                m_d[i,1] = ductile[i][1]
-                m_d[i,2] = ductile[i][2]
-                m_d[i,3] = ductile[i][3]
-            end
-            materials[end].ductile = m_d
+            # reshape into Nx3
+            n_triples = length(ductile_data) ÷ 3
+            mat.ductile = reshape(ductile_data, 3, n_triples)'
         end
     end
-    # Assign material IDs to parts
-    for (i, part) in enumerate(parts)
-        for (j, material) in enumerate(materials)
-            if part.material_name == material.name
-                part.material_id = j
+
+    return MATERIAL
+end
+
+"""
+    assignElementMaterial!(PART, INSTANCE, MATERIAL) -> (element_material, element_instance)
+
+Given PART, INSTANCE, and MATERIAL arrays, figure out the material assignments per element
+and also record which instance each element belongs to.
+"""
+function assignElementMaterial!(PART::Vector{PartType},
+                                INSTANCE::Vector{InstanceType},
+                                MATERIAL::Vector{MaterialType})
+    element_material = Int[]
+    element_instance = Int[]
+    for i in 1:length(INSTANCE)
+        part_id = INSTANCE[i].part_id
+        # match part's material with the one in the global MATERIAL list
+        for j in 1:length(MATERIAL)
+            if PART[part_id].material_name == MATERIAL[j].name
+                PART[part_id].material_id = j
+                INSTANCE[i].material_id   = j
                 break
             end
         end
-    end
-    return materials
-end
-
-"""
-    parse_global_model_data(lines::Vector{String}, parts::Vector{PartType}, instances::Vector{InstanceType})
-        -> Tuple{Int, Array{Float64,2}, Int, Array{Int,2}, Vector{Int}, Vector{Int}}
-
-Parse the global model data including node coordinates, element connectivity, and assign element material
-and instance information. Returns a tuple:
-(nNode, coordmat, nElement, elementmat, element_material, element_instance)
-"""
-function parse_global_model_data(lines::Vector{String}, parts::Vector{PartType}, instances::Vector{InstanceType})
-    n = length(lines)
-    n_node_total = 0
-    n_elem_total = 0
-    global_coordmat = Float64[]
-    global_elementmat = Int[]
-    element_material = Int[]
-    element_instance = Int[]
-    for i in eachindex(instances)
-        part_id = instances[i].part_id
-        coordmat_i = parts[part_id].coordmat
-        instances[i].node_offset = n_node_total
-        instances[i].element_offset = n_elem_total
-        instances[i].nNode = parts[part_id].nNode
-        instances[i].nElement = parts[part_id].nElement
-        instances[i].elements = collect(1:instances[i].nElement)
-        T = Matrix(I, 3, 3)
-        for j in length(instances[i].translate):-1:1
-            s_trans = instances[i].translate[j]
-            ss_trans = split(s_trans, ",", keepempty=false)
-            if length(ss_trans) == 3
-                offset_ = [parse(Float64, ss_trans[1]),
-                           parse(Float64, ss_trans[2]),
-                           parse(Float64, ss_trans[3])]'  # row vector
-                coordmat_i .= coordmat_i .+ offset_ .* ones(1, size(coordmat_i, 2))
-            elseif length(ss_trans) == 7
-                nv = [parse(Float64, ss_trans[4]) - parse(Float64, ss_trans[1]),
-                      parse(Float64, ss_trans[5]) - parse(Float64, ss_trans[2]),
-                      parse(Float64, ss_trans[6]) - parse(Float64, ss_trans[3])]
-                nv = nv / norm(nv)
-                n1, n2, n3 = nv
-                d = parse(Float64, ss_trans[7]) / 180.0 * pi
-                T = [n1*n1*(1-cos(d))+cos(d)   n1*n2*(1-cos(d))-n3*sin(d)   n1*n3*(1-cos(d))+n2*sin(d);
-                     n1*n2*(1-cos(d))+n3*sin(d)   n2*n2*(1-cos(d))+cos(d)   n2*n3*(1-cos(d))-n1*sin(d);
-                     n1*n3*(1-cos(d))-n2*sin(d)   n2*n3*(1-cos(d))+n1*sin(d)   n3*n3*(1-cos(d))+cos(d)]
-                coordmat_i = T * coordmat_i
-            end
-        end
-        elementmat_i = parts[part_id].elementmat .+ n_node_total
-        if i == 1
-            global_coordmat = coordmat_i
-            global_elementmat = elementmat_i
-        else
-            global_coordmat = [global_coordmat  coordmat_i]
-            global_elementmat = [global_elementmat  elementmat_i]
-        end
-        n_node_total += parts[part_id].nNode
-        n_elem_total += parts[part_id].nElement
-        mat_id = fill(parts[part_id].material_id, parts[part_id].nElement)
+        mat_id = fill(PART[part_id].material_id, PART[part_id].nElement)
         append!(element_material, mat_id)
-        inst_ids = fill(i, parts[part_id].nElement)
-        append!(element_instance, inst_ids)
+        inst_id = fill(i, PART[part_id].nElement)
+        append!(element_instance, inst_id)
     end
-    return (n_node_total, global_coordmat, n_elem_total, global_elementmat, element_material, element_instance)
+    return (element_material, element_instance)
 end
 
 """
-    parse_dynamic_step(lines::Vector{String}) -> Tuple{Float64, Float64}
+    parseStep(lines) -> (d_time, end_time)
 
-Parse the dynamic step parameters (d_time and end_time) from `lines`.
+Parses *Dynamic, Explicit parameters.
 """
-function parse_dynamic_step(lines::Vector{String})
-    d_time = 0.0
-    end_time = 0.0
-    n = length(lines)
-    for i in 1:n
+function parseStep(lines::Vector{String})
+    d_time, end_time = 0.0, 0.0
+    for i in 1:length(lines)
         if occursin("*Dynamic, Explicit", lines[i])
-            s_line = replace(lines[i+1], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            d_time = parse(Float64, ss_line[1])
-            end_time = parse(Float64, ss_line[2])
+            s = replace(lines[i+1], " " => "")
+            ss = split(s, ",", keepempty=false)
+            d_time   = parse(Float64, ss[1])
+            end_time = parse(Float64, ss[2])
             break
         end
     end
@@ -774,20 +829,20 @@ function parse_dynamic_step(lines::Vector{String})
 end
 
 """
-    parse_mass_scaling(lines::Vector{String}) -> Float64
+    parseMassScaling(lines) -> Float64
 
-Parse the mass scaling factor from `lines`.
+Parses *Fixed Mass Scaling to obtain mass scaling factor.
 """
-function parse_mass_scaling(lines::Vector{String})
+function parseMassScaling(lines::Vector{String})
     mass_scaling = 1.0
-    n = length(lines)
-    for i in 1:n
+    for i in 1:length(lines)
         if occursin("*Fixed Mass Scaling", lines[i])
-            s_line = replace(lines[i], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            ss_line = ss_line[2]
-            factor_str = ss_line[findfirst("factor=", ss_line).stop+1:end]
-            mass_scaling = parse(Float64, factor_str)
+            s = replace(lines[i], " " => "")
+            ss = split(s, ",", keepempty=false)
+            # factor=
+            fac_ = ss[2]
+            fac_ = fac_[ findfirst("factor=", fac_).stop+1 : end ]
+            mass_scaling = parse(Float64, fac_)
             break
         end
     end
@@ -795,251 +850,360 @@ function parse_mass_scaling(lines::Vector{String})
 end
 
 """
-    parse_bc(lines::Vector{String}, global_nsets::Vector{NsetType},
-             amplitudes::Vector{AmplitudeType}, instances::Vector{InstanceType},
-             parts::Vector{PartType}) -> Vector{BCType}
+    parseBC(lines, AMPLITUDE, INSTANCE, PART, NSET) -> Vector{BCType}
 
-Parse boundary condition sections from `lines` and return a vector of `BCType`.
+Parses *Boundary blocks, linking to amplitude if specified.
 """
-function parse_bc(lines::Vector{String}, global_nsets::Vector{NsetType},
-                  amplitudes::Vector{AmplitudeType}, instances::Vector{InstanceType},
-                  parts::Vector{PartType})
-    n = length(lines)
-    bc_idxs = find_indices(lines, "*Boundary")
-    bc_conditions = BCType[]
-    for k in eachindex(bc_idxs)
-        bc = BCType("", Vector{Vector{Int}}(), Float64[], "", AmplitudeType("", zeros(Float64,1), zeros(Float64,1)))
-        push!(bc_conditions, bc)
-        index = bc_idxs[k]
-        s = replace(lines[index], " " => "")
-        ss = split(s, ",", keepempty=false)
+function parseBC(lines::Vector{String},
+                 AMPLITUDE::Vector{AmplitudeType},
+                 INSTANCE::Vector{InstanceType},
+                 PART::Vector{PartType},
+                 NSET::Vector{NsetType})
+
+    bc_index = findLineIndices(lines, "*Boundary")
+    BC = BCType[]
+
+    for idx in bc_index
+        bc = BCType("", [], Float64[], "", AmplitudeType("", Float64[], Float64[]))
+        push!(BC, bc)
+
+        # check if amplitude= is in the same line
+        line_ = replace(lines[idx], " " => "")
+        ss = split(line_, ",", keepempty=false)
         if length(ss) == 2 && occursin("amplitude=", ss[2])
-            token = ss[2]
-            amp_name = token[findfirst("amplitude=", token).stop+1:end]
-            bc_conditions[end].amp_name = amp_name
-            for amp in amplitudes
-                if amp.name == amp_name
-                    bc_conditions[end].amplitude = amp
+            amp_s = ss[2]
+            amp_name = amp_s[ findfirst("amplitude=", amp_s).stop+1 : end ]
+            bc.amp_name = amp_name
+            # link to amplitude
+            for a in AMPLITUDE
+                if a.name == amp_name
+                    bc.amplitude = a
                     break
                 end
             end
         end
-        for i in index+1:n
-            if occursin("*Boundary", lines[i]) || occursin("**", lines[i])
+
+        # read subsequent lines until next "*Boundary" or "**"
+        line_i = idx + 1
+        while line_i <= length(lines)
+            if line_i>length(lines) || occursin("*Boundary", lines[line_i]) || occursin("**", lines[line_i])
                 break
             end
-            s_line = replace(lines[i], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            bc_conditions[end].Nset_name = ss_line[1]
+            line2 = replace(lines[line_i], " " => "")
+            tokens = split(line2, ",", keepempty=false)
+            bc.Nset_name = tokens[1]
+            # gather nodes
             nodes = Int[]
-            if occursin(".", bc_conditions[end].Nset_name)
-                sss = split(bc_conditions[end].Nset_name, ".", keepempty=false)
-                instance_name = sss[1]
-                nset_name = sss[2]
-                instance_id = 0
-                part_id = 0
-                for j in eachindex(instances)
-                    if instances[j].name == instance_name
+
+            # check for local part nset or global nset
+            if occursin(".", bc.Nset_name)
+                # parse "instanceName.nsetName"
+                s2 = split(bc.Nset_name, '.', keepempty=false)
+                instance_name = s2[1]
+                nset_name     = s2[2]
+                instance_id   = 0
+                part_id       = 0
+                for j in 1:length(INSTANCE)
+                    if INSTANCE[j].name == instance_name
                         instance_id = j
-                        part_id = instances[j].part_id
+                        part_id     = INSTANCE[j].part_id
                         break
                     end
                 end
-                for j in eachindex(parts[part_id].NSET)
-                    if parts[part_id].NSET[j].name == nset_name
-                        nodes_j = parts[part_id].NSET[j].nodes .+ instances[instance_id].node_offset
-                        push!(nodes, nodes_j)
+                # look up the nset inside that part
+                for ns_ in PART[part_id].NSET
+                    if ns_.name == nset_name
+                        nodes_j = ns_.nodes .+ INSTANCE[instance_id].node_offset
+                        append!(nodes, nodes_j)
                         break
                     end
                 end
             else
-                for ns in global_nsets
-                    if bc_conditions[end].Nset_name == ns.name
-                        nodes_j = ns.nodes .+ instances[ns.instance_id].node_offset
-                        push!(nodes, nodes_j)
+                # global nset
+                for ns_ in NSET
+                    if bc.Nset_name == ns_.name
+                        nodes_j = ns_.nodes .+ INSTANCE[ns_.instance_id].node_offset
+                        append!(nodes, nodes_j)
                     end
                 end
             end
-            dof = Int[]
-            if length(ss_line) == 2 && occursin("ENCASTRE", ss_line[2])
-                push!(dof, nodes*3 .- 2)
-                push!(dof, nodes*3 .- 1)
-                push!(dof, nodes*3)
-                push!(bc_conditions[end].dof, dof)
-                bc_conditions[end].value = [0.0]
-            elseif length(ss_line) == 3
-                dir = parse(Int, ss_line[3])
-                if dir <= 3
-                    dof = nodes*3 .- (3 - dir)
-                    push!(bc_conditions[end].dof, dof)
-                    push!(bc_conditions[end].value, 0.0)
+
+            # interpret the DOFs and values
+            if length(tokens) == 2 && occursin("ENCASTRE", tokens[1]) || occursin("ENCASTRE", tokens[2])
+                # ENCASTRE => fix all dofs in [1..3]
+                dof_ = Int[]
+                append!(dof_, nodes*3 .- 2)
+                append!(dof_, nodes*3 .- 1)
+                append!(dof_, nodes*3)
+                push!(bc.dof, sort(dof_))
+                push!(bc.value, 0.0)
+            elseif length(tokens) == 3
+                # (nsetName, iDir, iComp)
+                dir = parse(Int, tokens[2])
+                comp = parse(Int, tokens[3])
+                if comp <= 3
+                    dof_ = nodes*3 .- (3-comp)
+                    push!(bc.dof, dof_)
+                    push!(bc.value, 0.0)
                 end
-            elseif length(ss_line) == 4
-                dir = parse(Int, ss_line[3])
-                value = parse(Float64, ss_line[4])
-                if dir <= 3
-                    dof = nodes*3 .- (3 - dir)
-                    push!(bc_conditions[end].dof, dof)
-                    push!(bc_conditions[end].value, value)
+            elseif length(tokens) == 4
+                # (nsetName, iDir, iComp, value)
+                dir = parse(Int, tokens[2])
+                comp = parse(Int, tokens[3])
+                val_ = parse(Float64, tokens[4])
+                if comp <= 3
+                    dof_ = nodes*3 .- (3-comp)
+                    push!(bc.dof, dof_)
+                    push!(bc.value, val_)
                 end
             end
+
+            line_i += 1
         end
     end
-    return bc_conditions
+
+    return BC
 end
 
 """
-    parse_ic(lines::Vector{String}, global_nsets::Vector{NsetType},
-             instances::Vector{InstanceType}, parts::Vector{PartType}) -> Vector{ICType}
+    parseIC(lines, INSTANCE, PART, NSET) -> Vector{ICType}
 
-Parse initial condition sections from `lines` and return a vector of `ICType`.
+Parses *Initial Conditions blocks.
 """
-function parse_ic(lines::Vector{String}, global_nsets::Vector{NsetType},
-                  instances::Vector{InstanceType}, parts::Vector{PartType})
-    n = length(lines)
-    ic_idxs = find_indices(lines, "*Initial Conditions")
-    ics = ICType[]
-    for k in eachindex(ic_idxs)
-        ic = ICType("", "", Vector{Vector{Int}}(), Float64[])
-        push!(ics, ic)
-        index = ic_idxs[k]
-        s = replace(lines[index], " " => "")
+function parseIC(lines::Vector{String},
+                 INSTANCE::Vector{InstanceType},
+                 PART::Vector{PartType},
+                 NSET::Vector{NsetType})
+
+    ic_index = findLineIndices(lines, "*Initial Conditions")
+    IC = ICType[]
+
+    for idx in ic_index
+        ic = ICType("", "", [], Float64[])
+        push!(IC, ic)
+
+        # parse "type="
+        s = replace(lines[idx], " " => "")
         ss = split(s, ",", keepempty=false)
-        ics[end].type = ss[2][findfirst("type=", ss[2]).stop+1:end]
-        for i in index+1:n
-            if occursin("*Initial Conditions", lines[i]) || occursin("**", lines[i])
+        if length(ss) >= 2 && occursin("type=", ss[2])
+            type_ = ss[2]
+            type_ = type_[ findfirst("type=", type_).stop+1 : end ]
+            ic.type = type_
+        end
+
+        # read subsequent lines until next *Initial Conditions or "**"
+        line_i = idx + 1
+        while line_i <= length(lines)
+            if line_i>length(lines) || occursin("*Initial Conditions", lines[line_i]) || occursin("**", lines[line_i])
                 break
             end
-            s_line = replace(lines[i], " " => "")
-            ss_line = split(s_line, ",", keepempty=false)
-            ics[end].Nset_name = ss_line[1]
+            line2 = replace(lines[line_i], " " => "")
+            tokens = split(line2, ",", keepempty=false)
+            ic.Nset_name = tokens[1]
+            # gather nodes
             nodes = Int[]
-            if occursin(".", ics[end].Nset_name)
-                sss = split(ics[end].Nset_name, ".", keepempty=false)
-                instance_name = sss[1]
-                nset_name = sss[2]
-                instance_id = 0
-                part_id = 0
-                for j in eachindex(instances)
-                    if instances[j].name == instance_name
+
+            if occursin(".", ic.Nset_name)
+                # parse "instanceName.nsetName"
+                s2 = split(ic.Nset_name, '.', keepempty=false)
+                instance_name = s2[1]
+                nset_name     = s2[2]
+                instance_id   = 0
+                part_id       = 0
+                for j in 1:length(INSTANCE)
+                    if INSTANCE[j].name == instance_name
                         instance_id = j
-                        part_id = instances[j].part_id
+                        part_id     = INSTANCE[j].part_id
                         break
                     end
                 end
-                for j in eachindex(parts[part_id].NSET)
-                    if parts[part_id].NSET[j].name == nset_name
-                        nodes = parts[part_id].NSET[j].nodes .+ instances[instance_id].node_offset
+                for ns_ in PART[part_id].NSET
+                    if ns_.name == nset_name
+                        nodes_j = ns_.nodes .+ INSTANCE[instance_id].node_offset
+                        nodes   = nodes_j
                         break
                     end
                 end
             else
-                for ns in global_nsets
-                    if ics[end].Nset_name == ns.name
-                        nodes = ns.nodes .+ instances[ns.instance_id].node_offset
+                # global
+                for ns_ in NSET
+                    if ic.Nset_name == ns_.name
+                        nodes_j = ns_.nodes .+ INSTANCE[ns_.instance_id].node_offset
+                        nodes = nodes_j
                         break
                     end
                 end
             end
-            dir = parse(Int, ss_line[2])
-            dof = nodes*3 .- (3 - dir)
-            push!(ics[end].dof, dof)
-            v = parse(Float64, ss_line[3])
-            push!(ics[end].value, v)
+
+            # parse the dof and value
+            dir = parse(Int, tokens[2])
+            val_ = parse(Float64, tokens[3])
+            dof_ = nodes*3 .- (3-dir)
+            push!(ic.dof, dof_)
+            push!(ic.value, val_)
+
+            line_i += 1
         end
     end
-    return ics
+
+    return IC
 end
 
 """
-    parse_contact_and_cp(lines::Vector{String}, surfaces::Vector{SurfaceType})
-        -> Tuple{Int, Vector{CPType}}
+    parseContactFlag(lines) -> Int
 
-Parse contact flags and contact pair sections from `lines`. Returns a tuple containing the contact flag
-and a vector of `CPType`.
+Checks if *Contact or *Contact Inclusions (with self-contact) is present.
+Returns:
+  0 = no contact
+  1 = general contact
+  2 = self-contact
 """
-function parse_contact_and_cp(lines::Vector{String}, surfaces::Vector{SurfaceType})
-    n = length(lines)
+function parseContactFlag(lines::Vector{String})
     contact_flag = 0
-    for i in 1:n
-        if occursin("*Contact", lines[i])
+    for line_ in lines
+        if occursin("*Contact", line_)
             contact_flag = 1
             break
         end
     end
-    for i in 1:n
-        if occursin("*Contact Inclusions", lines[i]) && occursin("HAKAIoption=self-contact", lines[i])
+
+    # check for self-contact
+    for line_ in lines
+        if occursin("*Contact Inclusions", line_) && occursin("HAKAIoption=self-contact", line_)
             contact_flag = 2
             break
         end
     end
-    cp_idxs = Int[]
-    for i in 1:n
-        if occursin("*Contact Pair,", lines[i])
-            push!(cp_idxs, i)
-        end
-    end
-    cp_conditions = CPType[]
-    for k in eachindex(cp_idxs)
-        cp = CPType("", "", "", 0, 0, Int[], Int[],
-                    zeros(Int,0,0), zeros(Int,0,0), zeros(Int,0), zeros(Int,0),
-                    zeros(Int,0), zeros(Int,0))
-        push!(cp_conditions, cp)
-        index = cp_idxs[k]
-        s = replace(lines[index], " " => "")
-        ss = split(s, ",", keepempty=false)
-        cp_conditions[end].name = ss[4][findfirst("cpset=", ss[4]).stop+1:end]
-        s_next = replace(lines[index+1], " " => "")
-        ss_next = split(s_next, ",", keepempty=false)
-        cp_conditions[end].surface_name_1 = ss_next[1]
-        cp_conditions[end].surface_name_2 = ss_next[2]
-        for srf in surfaces
-            if cp_conditions[end].surface_name_1 == srf.name
-                cp_conditions[end].instance_id_1 = srf.instance_id
-                cp_conditions[end].elements_1 = srf.elements
-            end
-            if cp_conditions[end].surface_name_2 == srf.name
-                cp_conditions[end].instance_id_2 = srf.instance_id
-                cp_conditions[end].elements_2 = srf.elements
-            end
-        end
-    end
-    return (contact_flag, cp_conditions)
+
+    return contact_flag
 end
 
-# =============================================================================
-# Main Function
-# =============================================================================
+"""
+    parseContactPairs(lines, SURFACE) -> Vector{CPType}
+
+Parses *Contact Pair blocks into CPType.
+"""
+function parseContactPairs(lines::Vector{String}, SURFACE::Vector{SurfaceType})
+    cp_index = findLineIndices(lines, "*Contact Pair,")
+    CP = CPType[]
+
+    for idx in cp_index
+        cp = CPType("", "", "", 0, 0, Int[], Int[],
+                    zeros(Int,0,0), zeros(Int,0,0), Int[], Int[], Int[], Int[])
+        push!(CP, cp)
+
+        s = replace(lines[idx], " " => "")
+        ss = split(s, ",", keepempty=false)
+        # cpset
+        name_ = ss[4]
+        name_ = name_[ findfirst("cpset=", name_).stop+1 : end ]
+        cp.name = name_
+
+        # next line => surfaces
+        s2 = replace(lines[idx+1], " " => "")
+        ss2 = split(s2, ",", keepempty=false)
+        cp.surface_name_1 = ss2[1]
+        cp.surface_name_2 = ss2[2]
+
+        # find surfaces
+        for surf in SURFACE
+            if cp.surface_name_1 == surf.name
+                cp.instance_id_1 = surf.instance_id
+                cp.elements_1    = surf.elements
+            end
+            if cp.surface_name_2 == surf.name
+                cp.instance_id_2 = surf.instance_id
+                cp.elements_2    = surf.elements
+            end
+        end
+    end
+    return CP
+end
+
+#########################################################
+#                  Master read function                 #
+#########################################################
 
 """
-    read_inp_file(fname::String) -> ModelType
+    readInpFile(fname::String) -> ModelType
 
-Read an Abaqus inp file from `fname` and return a `ModelType` structure containing
-all parsed parts, instances, sets, surfaces, amplitudes, materials, BC, IC, contact pairs,
-and global model data.
+Top-level function that reads all lines of the .inp file, then parses out
+all relevant sections into a `ModelType`.
 """
-function read_inp_file(fname::String)
+function readInpFile(fname::String)
     println("readInpFile: ", fname)
-    lines = read_file_lines(fname)
-    # Parse each section of the inp file
-    parts         = parse_parts(lines)
-    instances     = parse_instances(lines, parts)
-    global_nsets  = parse_global_nsets(lines, instances)
-    elsets        = parse_elsets(lines, instances)
-    surfaces      = parse_surfaces(lines, elsets)
-    amplitudes    = parse_amplitudes(lines)
-    materials     = parse_materials(lines, parts)
-    n_node, coordmat, n_elem, elementmat, element_material, element_instance =
-                        parse_global_model_data(lines, parts, instances)
-    d_time, end_time = parse_dynamic_step(lines)
-    mass_scaling  = parse_mass_scaling(lines)
-    bc            = parse_bc(lines, global_nsets, amplitudes, instances, parts)
-    ic            = parse_ic(lines, global_nsets, instances, parts)
-    contact_flag, cp = parse_contact_and_cp(lines, surfaces)
-    # Assemble and return the global model
-    model = ModelType(parts, instances, global_nsets, elsets, surfaces, amplitudes,
-                      materials, bc, ic, cp, n_node, coordmat, n_elem, elementmat,
-                      element_material, element_instance, d_time, end_time, mass_scaling,
-                      contact_flag)
-    return model
+
+    # 1) Read lines
+    lines = readFile(fname)
+
+    # 2) Parts
+    PART = parseParts(lines)
+
+    # 3) Instances
+    INSTANCE = parseInstances(lines, PART)
+
+    # 4) Global Nsets
+    NSET = parseGlobalNsets(lines, INSTANCE)
+
+    # 5) Global Elsets
+    ELSET = parseGlobalElsets(lines, INSTANCE)
+
+    # 6) Surfaces
+    SURFACE = parseSurfaces(lines, ELSET)
+
+    # 7) Build global model (node/element assembly)
+    (nNode, coordmat, nElement, elementmat) = buildGlobalModel!(PART, INSTANCE)
+
+    # 8) Amplitudes
+    AMPLITUDE = parseAmplitudes(lines)
+
+    # 9) Materials
+    MATERIAL = parseMaterials(lines)
+
+    # 10) Assign element-material
+    (element_material, element_instance) = assignElementMaterial!(PART, INSTANCE, MATERIAL)
+
+    # 11) Dynamic step
+    (d_time, end_time) = parseStep(lines)
+
+    # 12) Mass scaling
+    mass_scaling = parseMassScaling(lines)
+
+    # 13) Boundary conditions
+    BC = parseBC(lines, AMPLITUDE, INSTANCE, PART, NSET)
+
+    # 14) Initial conditions
+    IC = parseIC(lines, INSTANCE, PART, NSET)
+
+    # 15) Contact
+    contact_flag = parseContactFlag(lines)
+
+    # 16) Contact pairs
+    CP = parseContactPairs(lines, SURFACE)
+
+    # Create model
+    MODEL = ModelType(
+        PART,
+        INSTANCE,
+        NSET,
+        ELSET,
+        SURFACE,
+        AMPLITUDE,
+        MATERIAL,
+        BC,
+        IC,
+        CP,
+        nNode,
+        coordmat,
+        nElement,
+        elementmat,
+        element_material,
+        element_instance,
+        d_time,
+        end_time,
+        mass_scaling,
+        contact_flag
+    )
+
+    return MODEL
 end
