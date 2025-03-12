@@ -65,4 +65,4 @@ jobs:
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
-          julia --project=docs --color=yes ./docs/make.jl
+          run(`julia --project=docs --color=yes ./docs/make.jl`)
