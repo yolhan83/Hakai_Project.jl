@@ -387,7 +387,7 @@ function run_simulation(fname::String)
     bug_report = open(rname, "w")
 
     # Read the input file
-    MODEL = readInpFile(fname)
+    MODEL = read_inp_file(fname)
 
     println("nNode: ", MODEL.nNode)
     println("nElement: ", MODEL.nElement)
