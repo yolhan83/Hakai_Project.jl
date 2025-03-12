@@ -3,5 +3,23 @@ uuid = "d882708a-e8db-442d-b14f-1a87a95ee138"
 authors = ["yolhan83 <yolhan@laposte.net>"]
 version = "0.0.1"
 
+[deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+FLoops = "cc61a311-1640-44b5-9fba-1b764f453329"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
 [compat]
+CUDA = "5.7.0"
+FLoops = "0.2.2"
+LinearAlgebra = "1.11.0"
+Plots = "1.40.9"
+Printf = "1.11.0"
+Quadmath = "0.5.11"
+Random = "1.11.0"
+StaticArrays = "1.9.13"
 julia = "1.10"
