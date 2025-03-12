@@ -65,7 +65,4 @@ jobs:
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
-          using Documenter: DocMeta, doctest
-          using Hakai_Project
-          DocMeta.setdocmeta!(Hakai_Project, :DocTestSetup, :(using Hakai_Project); recursive=true)
-          doctest(Hakai_Project)
+          julia --project=docs --color=yes ./docs/make.jl
